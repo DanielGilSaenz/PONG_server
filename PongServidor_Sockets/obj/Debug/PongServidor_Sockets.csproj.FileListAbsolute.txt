@@ -1,0 +1,7 @@
+C:\Users\DAM05\source\repos\PONG_server\PongServidor_Sockets\obj\Debug\PongServidor_Sockets.csprojAssemblyReference.cache
+C:\Users\DAM05\source\repos\PONG_server\PongServidor_Sockets\obj\Debug\PongServidor_Sockets.csproj.CoreCompileInputs.cache
+C:\Users\DAM05\source\repos\PONG_server\PongServidor_Sockets\bin\Debug\PongServidor_Sockets.exe.config
+C:\Users\DAM05\source\repos\PONG_server\PongServidor_Sockets\bin\Debug\PongServidor_Sockets.exe
+C:\Users\DAM05\source\repos\PONG_server\PongServidor_Sockets\bin\Debug\PongServidor_Sockets.pdb
+C:\Users\DAM05\source\repos\PONG_server\PongServidor_Sockets\obj\Debug\PongServidor_Sockets.exe
+C:\Users\DAM05\source\repos\PONG_server\PongServidor_Sockets\obj\Debug\PongServidor_Sockets.pdb
