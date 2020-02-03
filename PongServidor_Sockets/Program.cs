@@ -20,6 +20,8 @@ namespace PongServidor_Sockets
                 IPAddress localAddr = IPAddress.Parse("127.0.0.1");
                 server = new TcpListener(localAddr, port);
                 server.Start();
+                TcpClient client = server.AcceptTcpClient();
+                Console.WriteLine("Connected!");
                 while (true) ;
             }
             catch
