@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PongServidor_Sockets.Controller;
+using PongServidor_Sockets.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,6 +12,8 @@ namespace PongServidor_Sockets
 {
     class Program
     {
+        public static Partida[] partidasPool = new Partida[3];
+
         static void Main(string[] args)
         {
             TcpListener server = null;
@@ -20,9 +24,29 @@ namespace PongServidor_Sockets
                 IPAddress localAddr = IPAddress.Parse("127.0.0.1");
                 server = new TcpListener(localAddr, port);
                 server.Start();
-                TcpClient client = server.AcceptTcpClient();
-                Console.WriteLine("Connected!");
-                while (true) ;
+                Console.WriteLine("server started with " + server.LocalEndpoint.ToString());
+
+                for (int i = 0; i < partidasPool.Length; i++)
+                {
+                    partidasPool[i] = new Partida();
+                }
+
+                while (true)
+                {
+
+                    Partida nextPartida = null;
+                    foreach (Partida p in partidasPool)
+                    {
+                        if (!p.jugandose) nextPartida = p;
+                    }
+
+                    if (nextPartida == null) continue;
+                    else
+                    {
+                        new Task(() => PartidaHandler.handleClient(server, nextPartida)).Start();
+                    }
+                    
+                };
             }
             catch
             {
