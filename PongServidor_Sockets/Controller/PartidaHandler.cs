@@ -19,6 +19,7 @@ namespace PongServidor_Sockets.Controller
             partida.jugandose = true;
             while (true) ;
             */
+
             //Console.WriteLine("Task #{0} created at {1}, ran on thread #{2}.",data.Name, data.CreationTime, data.ThreadNum);
         }
     }
