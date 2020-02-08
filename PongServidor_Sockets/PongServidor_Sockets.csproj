@@ -82,11 +82,13 @@
     <Compile Include="Model\Math Objects\Vector.cs" />
     <Compile Include="Model\Resources.cs" />
     <Compile Include="Model\Serializable\Ball.cs" />
+    <Compile Include="Model\Serializable\Jugada.cs" />
     <Compile Include="Model\Serializable\Player.cs" />
+    <Compile Include="Model\Serializable\PlayerPos.cs" />
     <Compile Include="Model\Serializable\ServerConfigParams.cs" />
     <Compile Include="Model\Serializable\StatusBoard.cs" />
     <Compile Include="Model\Serializable\Wall.cs" />
-    <Compile Include="Model\Partida.cs" />
+    <Compile Include="Model\Serializable\Partida.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

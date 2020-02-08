@@ -1,5 +1,8 @@
-﻿using PongServidor_Sockets.Controller;
+﻿using PongCliente_Sockets.MVC.Model.Math_Objects;
+using PongCliente_Sockets.MVC.Model.Serializable;
+using PongServidor_Sockets.Controller;
 using PongServidor_Sockets.Model;
+using PongServidor_Sockets.Model.Serializable;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +19,7 @@ namespace PongServidor_Sockets
 
         static void Main(string[] args)
         {
+            goto test;
             TcpListener server = null;
             try
             {
@@ -41,11 +45,11 @@ namespace PongServidor_Sockets
                         if (partidasPool[index].client1 == null) partidasPool[index].client1 = client;
                         else if (partidasPool[index].client2 == null) partidasPool[index].client2 = client;
 
-                        if ((partidasPool[index].client1!= null) && (partidasPool[index].client2 != null))
+                        if ((partidasPool[index].client1 != null) && (partidasPool[index].client2 != null))
                         {
                             partidasPool[index].jugandose = true;
                             new Task(() => PartidaHandler.handleClient(server, partidasPool[index])).Start();
-                        }                        
+                        }
                     }
                 };
             }
@@ -53,6 +57,16 @@ namespace PongServidor_Sockets
             {
 
             }
+
+        test:
+            Jugada j = new Jugada();
+            j.player1 = new PlayerPos(new Point(2147483647, 2147483647));
+            j.ball = new Ball(new fPoint(2147483647, 2147483647), new fVector(2147483647, 2147483647), true);
+            string msg = j.getAttr(j);
+            byte[] bytes = Encoding.ASCII.GetBytes(msg);
+            Console.WriteLine("Msg :{0}", msg);
+            Console.WriteLine("Bytes count :{0}", bytes.Length);
+            Console.ReadKey();
         }
 
         /// <summary>Gets the index of the next free match</summary>
