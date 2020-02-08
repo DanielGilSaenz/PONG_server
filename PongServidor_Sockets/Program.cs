@@ -31,18 +31,22 @@ namespace PongServidor_Sockets
                     partidasPool[i] = new Partida();
                 }
 
+                Console.WriteLine("Waiting for clients to connect");
                 while (true)
                 {
                     TcpClient client = server.AcceptTcpClient();
-
-                    new Task(() => PartidaHandler.handleClient(server, nextPartida)).Start();
-
-                    if (nextPartida == null) continue;
-                    else
+                    int index = nextFreePartida();
+                    if (index >= 0)
                     {
-                        
+                        if (partidasPool[index].client1 == null) partidasPool[index].client1 = client;
+                        else if (partidasPool[index].client2 == null) partidasPool[index].client2 = client;
+
+                        if ((partidasPool[index].client1!= null) && (partidasPool[index].client2 != null))
+                        {
+                            partidasPool[index].jugandose = true;
+                            new Task(() => PartidaHandler.handleClient(server, partidasPool[index])).Start();
+                        }                        
                     }
-                    
                 };
             }
             catch
@@ -51,14 +55,14 @@ namespace PongServidor_Sockets
             }
         }
 
-        private static ref Partida nextFreePartida()
+        /// <summary>Gets the index of the next free match</summary>
+        private static int nextFreePartida()
         {
-            Partida nullPartida;
             for (int i = 0; i < partidasPool.Length; i++)
             {
-                if (!partidasPool[i].jugandose) return ref partidasPool[i];
+                if (!partidasPool[i].jugandose) return i;
             }
-            return ref nullPartida;
+            return -1;
         }
     }
 }
