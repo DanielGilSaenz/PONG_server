@@ -33,17 +33,14 @@ namespace PongServidor_Sockets
 
                 while (true)
                 {
+                    TcpClient client = server.AcceptTcpClient();
 
-                    Partida nextPartida = null;
-                    foreach (Partida p in partidasPool)
-                    {
-                        if (!p.jugandose) nextPartida = p;
-                    }
+                    new Task(() => PartidaHandler.handleClient(server, nextPartida)).Start();
 
                     if (nextPartida == null) continue;
                     else
                     {
-                        new Task(() => PartidaHandler.handleClient(server, nextPartida)).Start();
+                        
                     }
                     
                 };
@@ -52,6 +49,16 @@ namespace PongServidor_Sockets
             {
 
             }
+        }
+
+        private static ref Partida nextFreePartida()
+        {
+            Partida nullPartida;
+            for (int i = 0; i < partidasPool.Length; i++)
+            {
+                if (!partidasPool[i].jugandose) return ref partidasPool[i];
+            }
+            return ref nullPartida;
         }
     }
 }

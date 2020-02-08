@@ -14,7 +14,6 @@ namespace PongServidor_Sockets.Controller
         public static void handleClient(TcpListener server, Partida partida)
         {
             /*
-            TcpClient client = server.AcceptTcpClient();
             Console.WriteLine("Connected!");
             partida.jugandose = true;
             while (true) ;
