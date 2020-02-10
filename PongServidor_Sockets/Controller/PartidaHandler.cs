@@ -13,6 +13,10 @@ namespace PongServidor_Sockets.Controller
     {
         private static NetworkStream stream1;
         private static NetworkStream stream2;
+        private static RecieverHandler recieverHandler1;
+        private static RecieverHandler recieverHandler2;
+
+        private const int BYTES_NUM = 512;
 
         public static void handleClient(TcpListener server, Partida partida)
         {
@@ -23,37 +27,30 @@ namespace PongServidor_Sockets.Controller
 
             sendAll_MatchFound();
 
-            Byte[] bytes = new Byte[512];
+            Byte[] bytes1 = new Byte[BYTES_NUM];
+            Byte[] bytes2 = new Byte[BYTES_NUM];
             int count = 0;
 
-            string str1 =  receive(stream1, bytes, count);
-            string str2 = receive(stream2, bytes, count);
+            recieverHandler1 = new RecieverHandler(stream1, bytes1);
+            recieverHandler2 = new RecieverHandler(stream2, bytes2);
+
+
+            string str1 = recieverHandler1.getMsg();
+            string str2 = recieverHandler2.getMsg();
             send(stream2,str1);
             send(stream1,str2);
-            //Console.WriteLine("Task #{0} created at {1}, ran on thread #{2}.",data.Name, data.CreationTime, data.ThreadNum);
         }
 
-        /// <summary>Checks if there is something to recieve </summary>
-        private static string receive(NetworkStream stream, Byte[] bytes, int count)
-        {
-            if ((count = stream.Read(bytes, 0, bytes.Length)) != 0)
-            {
-                // Translate data bytes to a ASCII string.
-                return Encoding.ASCII.GetString(bytes, 0, count);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        /// <summary></summary>
+        /// <summary>If the msg is not null, tries to send it</summary>
         private static void send(NetworkStream stream, string msg)
         {
             if(msg != null)
             {
-                Byte[] bytes = Encoding.ASCII.GetBytes(msg);
-                stream.Write(bytes, 0, bytes.Length);
+                new Task(() =>
+                {
+                    Byte[] bytes = Encoding.ASCII.GetBytes(msg);
+                    stream.Write(bytes, 0, bytes.Length);
+                }).Start();                
             }            
         }
 

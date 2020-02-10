@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\PartidaHandler.cs" />
+    <Compile Include="Controller\RecieverHandler.cs" />
     <Compile Include="Interfaces\ICompareBool.cs" />
     <Compile Include="Interfaces\Mostrar.cs" />
     <Compile Include="Model\Math Objects\fPoint.cs" />

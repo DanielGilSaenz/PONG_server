@@ -52,7 +52,6 @@ namespace PongServidor_Sockets
                         if ((partidasPool[index].client1 != null) && (partidasPool[index].client2 != null))
                         {
                             partidasPool[index].jugandose = true;
-                            goto test;
                             new Task(() => PartidaHandler.handleClient(server, partidasPool[index])).Start();
                         }
                     }
@@ -62,7 +61,7 @@ namespace PongServidor_Sockets
             {
 
             }
-
+            /*
         test:
 
             Byte[] bytes1 = new Byte[512];
@@ -79,6 +78,7 @@ namespace PongServidor_Sockets
             Console.WriteLine("Bytes count :{0}", bytes.Length);
             Console.ReadKey();
             while (true) ;
+            */
         }
 
         /// <summary>Gets the index of the next free match</summary>
