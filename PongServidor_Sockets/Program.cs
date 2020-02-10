@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace PongServidor_Sockets
 {
@@ -19,8 +20,9 @@ namespace PongServidor_Sockets
 
         static void Main(string[] args)
         {
-            goto test;
+            
             TcpListener server = null;
+            
             try
             {
                 // Set the TcpListener on port 13000.
@@ -29,6 +31,8 @@ namespace PongServidor_Sockets
                 server = new TcpListener(localAddr, port);
                 server.Start();
                 Console.WriteLine("server started with " + server.LocalEndpoint.ToString());
+
+                
 
                 for (int i = 0; i < partidasPool.Length; i++)
                 {
@@ -48,6 +52,7 @@ namespace PongServidor_Sockets
                         if ((partidasPool[index].client1 != null) && (partidasPool[index].client2 != null))
                         {
                             partidasPool[index].jugandose = true;
+                            goto test;
                             new Task(() => PartidaHandler.handleClient(server, partidasPool[index])).Start();
                         }
                     }
@@ -59,14 +64,21 @@ namespace PongServidor_Sockets
             }
 
         test:
+
+            Byte[] bytes1 = new Byte[512];
+            int count = 0;
+            NetworkStream stream = partidasPool[0].client1.GetStream();
+            if (false) stream.Read(bytes1, 0, bytes1.Length);
+
             Jugada j = new Jugada();
-            j.player1 = new PlayerPos(new Point(2147483647, 2147483647));
+            j.player1 = new Player(Key.A,Key.DbeEnterImeConfigureMode, 2147483647, 2147483647, new Point(2147483647, 2147483647), 2147483647);
             j.ball = new Ball(new fPoint(2147483647, 2147483647), new fVector(2147483647, 2147483647), true);
             string msg = j.getAttr(j);
             byte[] bytes = Encoding.ASCII.GetBytes(msg);
             Console.WriteLine("Msg :{0}", msg);
             Console.WriteLine("Bytes count :{0}", bytes.Length);
             Console.ReadKey();
+            while (true) ;
         }
 
         /// <summary>Gets the index of the next free match</summary>

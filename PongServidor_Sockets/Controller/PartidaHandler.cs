@@ -23,18 +23,20 @@ namespace PongServidor_Sockets.Controller
 
             sendAll_MatchFound();
 
-            Byte[] bytes = new Byte[256];
+            Byte[] bytes = new Byte[512];
             int count = 0;
 
-            receive(stream1, bytes, count);
-            receive(stream2, bytes, count);
+            string str1 =  receive(stream1, bytes, count);
+            string str2 = receive(stream2, bytes, count);
+            send(stream2,str1);
+            send(stream1,str2);
             //Console.WriteLine("Task #{0} created at {1}, ran on thread #{2}.",data.Name, data.CreationTime, data.ThreadNum);
         }
 
         /// <summary>Checks if there is something to recieve </summary>
         private static string receive(NetworkStream stream, Byte[] bytes, int count)
         {
-            if ((count = stream1.Read(bytes, 0, bytes.Length)) != 0)
+            if ((count = stream.Read(bytes, 0, bytes.Length)) != 0)
             {
                 // Translate data bytes to a ASCII string.
                 return Encoding.ASCII.GetString(bytes, 0, count);
@@ -43,6 +45,16 @@ namespace PongServidor_Sockets.Controller
             {
                 return null;
             }
+        }
+
+        /// <summary></summary>
+        private static void send(NetworkStream stream, string msg)
+        {
+            if(msg != null)
+            {
+                Byte[] bytes = Encoding.ASCII.GetBytes(msg);
+                stream.Write(bytes, 0, bytes.Length);
+            }            
         }
 
         /// <summary>Sends a message to all clients in this match to start playing <summary>
