@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using PongServidor_Sockets.Model;
+using System.Diagnostics;
 
 namespace PongServidor_Sockets.Controller
 {
@@ -35,23 +36,30 @@ namespace PongServidor_Sockets.Controller
             recieverHandler2 = new RecieverHandler(stream2, bytes2);
 
 
-            string str1 = recieverHandler1.getMsg();
-            string str2 = recieverHandler2.getMsg();
-            send(stream2,str1);
-            send(stream1,str2);
+            while (true)
+            {
+                string str1 = recieverHandler1.getMsg();
+                string str2 = recieverHandler2.getMsg();
+
+                if (!string.IsNullOrEmpty(str1))
+                    Console.WriteLine("stram1: " + str1);
+                if (!string.IsNullOrEmpty(str2))
+                    Console.WriteLine("stram2: " + str2);
+
+                send(stream2, str1);
+                send(stream1, str2);
+            }
         }
 
         /// <summary>If the msg is not null, tries to send it</summary>
         private static void send(NetworkStream stream, string msg)
         {
-            if(msg != null)
+            if (!string.IsNullOrEmpty(msg))
             {
-                new Task(() =>
-                {
-                    Byte[] bytes = Encoding.ASCII.GetBytes(msg);
-                    stream.Write(bytes, 0, bytes.Length);
-                }).Start();                
-            }            
+                //Debug.WriteLine(msg);
+                byte[] bytes = Encoding.ASCII.GetBytes(msg);
+                stream.Write(bytes, 0, bytes.Length);
+            }
         }
 
         /// <summary>Sends a message to all clients in this match to start playing <summary>
