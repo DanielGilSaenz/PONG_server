@@ -48,6 +48,25 @@ namespace PongServidor_Sockets.Controller
 
                 send(stream2, str1);
                 send(stream1, str2);
+
+                /*
+                if (!partida.client1.Connected)
+                {
+                    //partida.client1.Close();
+                    //partida.client2.Close();
+                    partida.jugandose = false;
+                    Console.Clear();
+                    break;
+                }
+                else if (!partida.client2.Connected)
+                {
+                    //partida.client1.Close();
+                    //partida.client2.Close();
+                    partida.jugandose = false;
+                    Console.Clear();
+                    break;
+                }
+                */
             }
         }
 

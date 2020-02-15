@@ -16,7 +16,7 @@ namespace PongServidor_Sockets
 {
     class Program
     {
-        public static Partida[] partidasPool = new Partida[3];
+        public static Partida[] partidasPool = new Partida[10];
 
         static void Main(string[] args)
         {
@@ -27,7 +27,7 @@ namespace PongServidor_Sockets
             {
                 // Set the TcpListener on port 13000.
                 Int32 port = 8080;
-                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
+                IPAddress localAddr = IPAddress.Parse("0.0.0.0");
                 server = new TcpListener(localAddr, port);
                 server.Start();
                 Console.WriteLine("server started with " + server.LocalEndpoint.ToString());
