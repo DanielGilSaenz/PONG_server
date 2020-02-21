@@ -26,6 +26,14 @@ namespace PongServidor_Sockets.Controller
             stream1 = partida.client1.GetStream();
             stream2 = partida.client2.GetStream();
 
+            // --------------------------------------------------------------------------------------------------------------------------------->>>>>>> See you in space cowboy ...
+            /* Ggg5ZAALue4WxnLtlr6H KFgx9aOOH0VWBd0FMvxi Fhe9UmmGkX6SNFpUhYJT xThLJ9iFSUngIYcBGCme 3otCmas6Db4NrDV9Cl4x */
+            // Hay que enviar a los clientes la informacion para que sepan que jugador son, es decir repartir los
+            // roles del p1 y del p2
+
+            // También hay que probar lo de usar distintos puertos para cada cliente
+            // Saber que puertos estan libres ==> https://stackoverflow.com/questions/570098/in-c-how-to-check-if-a-tcp-port-is-available/4165374
+
             sendAll_MatchFound();
 
             Byte[] bytes1 = new Byte[BYTES_NUM];
