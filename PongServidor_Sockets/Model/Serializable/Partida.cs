@@ -10,6 +10,9 @@ namespace PongServidor_Sockets.Model
 {
     class Partida
     {
+        public int portP1 { get; set; }
+        public int portP2 { get; set; }
+
         public TcpClient client1 { get; set; }
         public TcpClient client2 { get; set; }
 

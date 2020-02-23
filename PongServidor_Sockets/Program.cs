@@ -25,7 +25,7 @@ namespace PongServidor_Sockets
             
             try
             {
-                // Set the TcpListener on port 13000.
+
                 Int32 port = 8080;
                 IPAddress localAddr = IPAddress.Parse("0.0.0.0");
                 server = new TcpListener(localAddr, port);
@@ -55,7 +55,7 @@ namespace PongServidor_Sockets
                             new Task(() => PartidaHandler.handleClient(server, partidasPool[index])).Start();
                         }
                     }
-                };
+                }
             }
             catch
             {

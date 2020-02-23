@@ -81,6 +81,7 @@
     <Compile Include="Model\Math Objects\Line.cs" />
     <Compile Include="Model\Math Objects\Point.cs" />
     <Compile Include="Model\Math Objects\Vector.cs" />
+    <Compile Include="Model\PortGenerator.cs" />
     <Compile Include="Model\Resources.cs" />
     <Compile Include="Model\Serializable\Ball.cs" />
     <Compile Include="Model\Serializable\Jugada.cs" />

@@ -16,23 +16,24 @@ namespace PongServidor_Sockets.Controller
         private static NetworkStream stream2;
         private static RecieverHandler recieverHandler1;
         private static RecieverHandler recieverHandler2;
+        private static PortGenerator portGenerator = new PortGenerator();
 
         private const int BYTES_NUM = 512;
 
         public static void handleClient(TcpListener server, Partida partida)
         {
+            
             Console.WriteLine("Match Found, 2 clients connected");
 
             stream1 = partida.client1.GetStream();
             stream2 = partida.client2.GetStream();
 
             // --------------------------------------------------------------------------------------------------------------------------------->>>>>>> See you in space cowboy ...
-            /* Ggg5ZAALue4WxnLtlr6H KFgx9aOOH0VWBd0FMvxi Fhe9UmmGkX6SNFpUhYJT xThLJ9iFSUngIYcBGCme 3otCmas6Db4NrDV9Cl4x */
-            // Hay que enviar a los clientes la informacion para que sepan que jugador son, es decir repartir los
-            // roles del p1 y del p2
+            // Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
+            // Si generar una task cada vez que se envia
 
-            // También hay que probar lo de usar distintos puertos para cada cliente
-            // Saber que puertos estan libres ==> https://stackoverflow.com/questions/570098/in-c-how-to-check-if-a-tcp-port-is-available/4165374
+            send(stream1, "p1");
+            send(stream2, "p2");
 
             sendAll_MatchFound();
 
@@ -40,14 +41,25 @@ namespace PongServidor_Sockets.Controller
             Byte[] bytes2 = new Byte[BYTES_NUM];
             int count = 0;
 
+
+
             recieverHandler1 = new RecieverHandler(stream1, bytes1);
             recieverHandler2 = new RecieverHandler(stream2, bytes2);
 
 
             while (true)
             {
-                string str1 = recieverHandler1.getMsg();
-                string str2 = recieverHandler2.getMsg();
+                stream1.ReadTimeout = 100;
+                stream2.ReadTimeout = 100;
+                string str1;
+                string str2;
+
+
+                count = stream1.Read(bytes1, 0, bytes1.Length);
+                str1 = Encoding.ASCII.GetString(bytes1, 0, count);
+
+                count = stream1.Read(bytes2, 0, bytes2.Length);
+                str2 = Encoding.ASCII.GetString(bytes2, 0, count);
 
                 if (!string.IsNullOrEmpty(str1))
                     Console.WriteLine("stram1: " + str1);
@@ -56,25 +68,6 @@ namespace PongServidor_Sockets.Controller
 
                 send(stream2, str1);
                 send(stream1, str2);
-
-                /*
-                if (!partida.client1.Connected)
-                {
-                    //partida.client1.Close();
-                    //partida.client2.Close();
-                    partida.jugandose = false;
-                    Console.Clear();
-                    break;
-                }
-                else if (!partida.client2.Connected)
-                {
-                    //partida.client1.Close();
-                    //partida.client2.Close();
-                    partida.jugandose = false;
-                    Console.Clear();
-                    break;
-                }
-                */
             }
         }
 
@@ -98,6 +91,16 @@ namespace PongServidor_Sockets.Controller
 
             stream1.Write(msg, 0, msg.Length);
             stream2.Write(msg, 0, msg.Length);
+        }
+
+        private static void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
+        {
+            // Maybe useless
+            int freePort;
+            portGenerator.getNextFreePort(out freePort);
+            send(oldStream, "newPort:" + freePort);
+            //newStream = new NetworkStream();
+            throw new NotImplementedException();
         }
     }
 }
