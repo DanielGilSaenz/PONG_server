@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using PongServidor_Sockets.Model;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 
 namespace PongServidor_Sockets.Controller
 {
@@ -31,44 +32,68 @@ namespace PongServidor_Sockets.Controller
             // --------------------------------------------------------------------------------------------------------------------------------->>>>>>> See you in space cowboy ...
             // Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
             // Si generar una task cada vez que se envia
+            // [x] DONE
+            // [!] Pendiente el testing
 
-            send(stream1, "p1");
-            send(stream2, "p2");
+            prepareMatch(stream1, "p1");
+            prepareMatch(stream2, "p2");
 
-            sendAll_MatchFound();
+            sendStartGame(stream1);
+            sendStartGame(stream2);
 
             Byte[] bytes1 = new Byte[BYTES_NUM];
             Byte[] bytes2 = new Byte[BYTES_NUM];
-            int count = 0;
-
-
-
             recieverHandler1 = new RecieverHandler(stream1, bytes1);
-            recieverHandler2 = new RecieverHandler(stream2, bytes2);
+            recieverHandler2 = new RecieverHandler(stream1, bytes2);
 
+            string str1;
+            string str2;
 
-            while (true)
+            while (bothConnected(partida))
             {
-                stream1.ReadTimeout = 100;
-                stream2.ReadTimeout = 100;
-                string str1;
-                string str2;
-
-
-                count = stream1.Read(bytes1, 0, bytes1.Length);
-                str1 = Encoding.ASCII.GetString(bytes1, 0, count);
-
-                count = stream1.Read(bytes2, 0, bytes2.Length);
-                str2 = Encoding.ASCII.GetString(bytes2, 0, count);
-
-                if (!string.IsNullOrEmpty(str1))
-                    Console.WriteLine("stram1: " + str1);
-                if (!string.IsNullOrEmpty(str2))
-                    Console.WriteLine("stram2: " + str2);
-
-                send(stream2, str1);
+                str1 = recieverHandler1.getMsg();
+                str2 = recieverHandler2.getMsg();
                 send(stream1, str2);
+                send(stream2, str1);
             }
+            Console.WriteLine("Desconnected");
+
+        }
+
+        /// <summary>Checks if both of the clients are still connected</summary>
+        private static bool bothConnected(Partida partida)
+        {
+            if (isConnected(partida.client1) && isConnected(partida.client2)) return true;
+            else return false;
+        }
+
+        /// <summary>Checks if the client is still connected</summary>
+        private static bool isConnected(TcpClient client)
+        {
+            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
+
+            TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections();
+
+            foreach (TcpConnectionInformation c in tcpConnections)
+            {
+                TcpState stateOfConnection = c.State;
+
+                if (c.LocalEndPoint.Equals(client.Client.LocalEndPoint) && c.RemoteEndPoint.Equals(client.Client.RemoteEndPoint))
+                {
+                    if (stateOfConnection == TcpState.Established)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                }
+
+            }
+
+            return false;
         }
 
         /// <summary>If the msg is not null, tries to send it</summary>
@@ -82,17 +107,6 @@ namespace PongServidor_Sockets.Controller
             }
         }
 
-        /// <summary>Sends a message to all clients in this match to start playing <summary>
-        private static void sendAll_MatchFound()
-        {
-            byte[] msg;
-            string matchFound = "MatchFound";
-            msg = Encoding.ASCII.GetBytes(matchFound);
-
-            stream1.Write(msg, 0, msg.Length);
-            stream2.Write(msg, 0, msg.Length);
-        }
-
         private static void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
         {
             // Maybe useless
@@ -101,6 +115,56 @@ namespace PongServidor_Sockets.Controller
             send(oldStream, "newPort:" + freePort);
             //newStream = new NetworkStream();
             throw new NotImplementedException();
+        }
+
+        /// <summary> Prepares both of the players to play </summary>
+        private static void prepareMatch(NetworkStream stream, string playerNumber)
+        {
+            new Task(() =>
+            {
+                Byte[] bytes = new Byte[BYTES_NUM];
+                stream.ReadTimeout = 100;
+                int count;
+                string response = "";
+
+                bytes = Encoding.ASCII.GetBytes("MatchFound");
+                stream1.Write(bytes, 0, bytes.Length);
+
+                bytes = new Byte[BYTES_NUM];
+                while (response != "Ok")
+                {
+                    count = stream1.Read(bytes, 0, bytes.Length);
+                    response = Encoding.ASCII.GetString(bytes, 0, count);
+                    bytes = new Byte[BYTES_NUM];
+                }
+
+                bytes = Encoding.ASCII.GetBytes(playerNumber);
+                stream1.Write(bytes, 0, bytes.Length);
+
+                bytes = new Byte[BYTES_NUM];
+                while (response != "Ok")
+                {
+                    count = stream1.Read(bytes, 0, bytes.Length);
+                    response = Encoding.ASCII.GetString(bytes, 0, count);
+                    bytes = new Byte[BYTES_NUM];
+                }
+
+            }).Start();
+        }
+
+        private static void sendStartGame(NetworkStream stream)
+        {
+            new Task(() =>
+            {
+                Byte[] bytes = new Byte[BYTES_NUM];
+                stream.ReadTimeout = 100;
+                int count;
+                string response = "";
+
+                bytes = Encoding.ASCII.GetBytes("StartGame");
+                stream1.Write(bytes, 0, bytes.Length);
+
+            }).Start();
         }
     }
 }
