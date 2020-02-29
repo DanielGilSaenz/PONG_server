@@ -131,7 +131,7 @@ namespace PongServidor_Sockets.Controller
                 stream1.Write(bytes, 0, bytes.Length);
 
                 bytes = new Byte[BYTES_NUM];
-                while (response != "Ok")
+                while (response != "OK")
                 {
                     count = stream1.Read(bytes, 0, bytes.Length);
                     response = Encoding.ASCII.GetString(bytes, 0, count);
@@ -143,7 +143,7 @@ namespace PongServidor_Sockets.Controller
                 stream1.Write(bytes, 0, bytes.Length);
 
                 bytes = new Byte[BYTES_NUM];
-                while (response != "Ok")
+                while (response != "OK")
                 {
                     count = stream1.Read(bytes, 0, bytes.Length);
                     response = Encoding.ASCII.GetString(bytes, 0, count);
