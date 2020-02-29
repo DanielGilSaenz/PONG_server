@@ -29,11 +29,10 @@ namespace PongServidor_Sockets.Controller
             stream1 = partida.client1.GetStream();
             stream2 = partida.client2.GetStream();
 
-            // --------------------------------------------------------------------------------------------------------------------------------->>>>>>> See you in space cowboy ...
-            // Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
-            // Si generar una task cada vez que se envia
-            // [x] DONE
-            // [!] Pendiente el testing
+            
+            // TODO Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
+            // TODO Si generar una task cada vez que se envia
+            // TODO [!] Pendiente el testing
 
             prepareMatch(stream1, "p1");
             prepareMatch(stream2, "p2");
@@ -127,6 +126,7 @@ namespace PongServidor_Sockets.Controller
                 int count;
                 string response = "";
 
+                // Wrtites a macth found to know the client is ready
                 bytes = Encoding.ASCII.GetBytes("MatchFound");
                 stream1.Write(bytes, 0, bytes.Length);
 
@@ -138,6 +138,7 @@ namespace PongServidor_Sockets.Controller
                     bytes = new Byte[BYTES_NUM];
                 }
 
+                // Wrtites the player number in order to configure the client
                 bytes = Encoding.ASCII.GetBytes(playerNumber);
                 stream1.Write(bytes, 0, bytes.Length);
 
