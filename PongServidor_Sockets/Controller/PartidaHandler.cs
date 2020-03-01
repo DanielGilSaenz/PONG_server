@@ -43,7 +43,7 @@ namespace PongServidor_Sockets.Controller
             Byte[] bytes1 = new Byte[BYTES_NUM];
             Byte[] bytes2 = new Byte[BYTES_NUM];
             recieverHandler1 = new RecieverHandler(stream1, bytes1);
-            recieverHandler2 = new RecieverHandler(stream1, bytes2);
+            recieverHandler2 = new RecieverHandler(stream2, bytes2);
 
             string str1;
             string str2;
@@ -52,6 +52,10 @@ namespace PongServidor_Sockets.Controller
             {
                 str1 = recieverHandler1.getMsg();
                 str2 = recieverHandler2.getMsg();
+
+                if (str1 != "") Console.WriteLine(str1);
+                if (str2 != "") Console.WriteLine(str2);
+
                 send(stream1, str2);
                 send(stream2, str1);
             }
@@ -100,6 +104,7 @@ namespace PongServidor_Sockets.Controller
         {
             if (!string.IsNullOrEmpty(msg))
             {
+                Console.WriteLine(msg);
                 //Debug.WriteLine(msg);
                 byte[] bytes = Encoding.ASCII.GetBytes(msg);
                 stream.Write(bytes, 0, bytes.Length);
@@ -128,24 +133,24 @@ namespace PongServidor_Sockets.Controller
 
                 // Wrtites a macth found to know the client is ready
                 bytes = Encoding.ASCII.GetBytes("MatchFound");
-                stream1.Write(bytes, 0, bytes.Length);
+                stream.Write(bytes, 0, bytes.Length);
 
                 bytes = new Byte[BYTES_NUM];
                 while (response != "OK")
                 {
-                    count = stream1.Read(bytes, 0, bytes.Length);
+                    count = stream.Read(bytes, 0, bytes.Length);
                     response = Encoding.ASCII.GetString(bytes, 0, count);
                     bytes = new Byte[BYTES_NUM];
                 }
 
                 // Wrtites the player number in order to configure the client
                 bytes = Encoding.ASCII.GetBytes(playerNumber);
-                stream1.Write(bytes, 0, bytes.Length);
+                stream.Write(bytes, 0, bytes.Length);
 
                 bytes = new Byte[BYTES_NUM];
                 while (response != "OK")
                 {
-                    count = stream1.Read(bytes, 0, bytes.Length);
+                    count = stream.Read(bytes, 0, bytes.Length);
                     response = Encoding.ASCII.GetString(bytes, 0, count);
                     bytes = new Byte[BYTES_NUM];
                 }
@@ -163,7 +168,7 @@ namespace PongServidor_Sockets.Controller
                 string response = "";
 
                 bytes = Encoding.ASCII.GetBytes("StartGame");
-                stream1.Write(bytes, 0, bytes.Length);
+                stream.Write(bytes, 0, bytes.Length);
 
             }).Start();
         }
