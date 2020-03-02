@@ -42,19 +42,15 @@ namespace PongServidor_Sockets.Controller
 
             Byte[] bytes1 = new Byte[BYTES_NUM];
             Byte[] bytes2 = new Byte[BYTES_NUM];
-            recieverHandler1 = new RecieverHandler(stream1, bytes1);
-            recieverHandler2 = new RecieverHandler(stream2, bytes2);
 
             string str1;
             string str2;
 
             while (bothConnected(partida))
             {
-                str1 = recieverHandler1.getMsg();
-                str2 = recieverHandler2.getMsg();
-
-                if (str1 != "") Console.WriteLine(str1);
-                if (str2 != "") Console.WriteLine(str2);
+                // TODO reciever handles seems to not work at all
+                str1 = read(stream1, 100);
+                str2 = read(stream2, 100);
 
                 send(stream1, str2);
                 send(stream2, str1);
@@ -105,10 +101,20 @@ namespace PongServidor_Sockets.Controller
             if (!string.IsNullOrEmpty(msg))
             {
                 Console.WriteLine(msg);
+                Console.WriteLine(msg);
                 //Debug.WriteLine(msg);
                 byte[] bytes = Encoding.ASCII.GetBytes(msg);
                 stream.Write(bytes, 0, bytes.Length);
             }
+        }
+
+        private static string read(NetworkStream stream, int timeout)
+        {
+            Byte[] bytes = new Byte[BYTES_NUM];
+            stream.ReadTimeout = timeout;
+            int count = stream.Read(bytes, 0, bytes.Length);
+            string response = Encoding.ASCII.GetString(bytes, 0, count);
+            return response;
         }
 
         private static void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
