@@ -16,7 +16,7 @@ namespace PongServidor_Sockets
 {
     class Program
     {
-        public static Partida[] partidasPool = new Partida[10];
+        public static Partida[] partidasPool = new Partida[1];
 
         static void Main(string[] args)
         {
@@ -47,7 +47,7 @@ namespace PongServidor_Sockets
                     if (index >= 0)
                     {
                         if (partidasPool[index].client1 == null) partidasPool[index].client1 = client;
-                        else if (partidasPool[index].client2 == null) partidasPool[index].client2 = client;
+                        //else if (partidasPool[index].client2 == null) partidasPool[index].client2 = client;
 
                         if ((partidasPool[index].client1 != null) )//&& (partidasPool[index].client2 != null))
                         {

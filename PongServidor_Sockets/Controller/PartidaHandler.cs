@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using PongServidor_Sockets.Model;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
+using System.Threading;
 
 namespace PongServidor_Sockets.Controller
 {
@@ -21,43 +22,43 @@ namespace PongServidor_Sockets.Controller
 
         private const int BYTES_NUM = 512;
 
-        public static void handleClient(TcpListener server, Partida partida)
-        {
+        //public static void handleClient(TcpListener server, Partida partida)
+        //{
 
-            Console.WriteLine("Match Found, 2 clients connected");
+        //    Console.WriteLine("Match Found, 2 clients connected");
 
-            stream1 = partida.client1.GetStream();
-            stream2 = partida.client2.GetStream();
+        //    stream1 = partida.client1.GetStream();
+        //    stream2 = partida.client2.GetStream();
 
 
-            // TODO Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
-            // TODO Si generar una task cada vez que se envia
-            // TODO [!] Pendiente el testing
+        //    // TODO Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
+        //    // TODO Si generar una task cada vez que se envia
+        //    // TODO [!] Pendiente el testing
 
-            prepareMatch(stream1, "p1");
-            prepareMatch(stream2, "p2");
+        //    //prepareMatch(stream1, "p1");
+        //    //prepareMatch(stream2, "p2");
 
-            sendStartGame(stream1);
-            sendStartGame(stream2);
+        //    //sendStartGame(stream1);
+        //    //sendStartGame(stream2);
 
-            Byte[] bytes1 = new Byte[BYTES_NUM];
-            Byte[] bytes2 = new Byte[BYTES_NUM];
+        //    Byte[] bytes1 = new Byte[BYTES_NUM];
+        //    Byte[] bytes2 = new Byte[BYTES_NUM];
 
-            string str1;
-            string str2;
+        //    string str1;
+        //    string str2;
 
-            while (bothConnected(partida))
-            {
-                // TODO reciever handles seems to not work at all
-                str1 = read(stream1, 100);
-                str2 = read(stream2, 100);
+        //    while (bothConnected(partida))
+        //    {
+        //        // TODO reciever handles seems to not work at all
+        //        str1 = read(stream1, 100);
+        //        str2 = read(stream2, 100);
 
-                send(stream1, str2);
-                send(stream2, str1);
-            }
-            Console.WriteLine("Desconnected");
+        //        send(stream1, str2);
+        //        send(stream2, str1);
+        //    }
+        //    Console.WriteLine("Desconnected");
 
-        }
+        //}
 
         public static void handleClientOnlyOne(TcpListener server, Partida partida)
         {
@@ -71,18 +72,27 @@ namespace PongServidor_Sockets.Controller
             // TODO Si generar una task cada vez que se envia
             // TODO [!] Pendiente el testing
 
-            prepareMatch(stream1, "p1");
+            do
+            {
+                send(stream1, "MatchFound");
+            } while (!waitForMsg(5000, "OK", stream1));
 
-            sendStartGame(stream1);
+            do
+            {
+                send(stream1, "p1");
+            } while (!waitForMsg(5000, "OK", stream1));
 
-            Byte[] bytes1 = new Byte[BYTES_NUM];
+            do
+            {
+                send(stream1, "StartGame");
+            } while (!waitForMsg(5000,"OK", stream1));
 
             string str1;
-
             while (bothConnected(partida))
             {
                 // TODO reciever handles seems to not work at all
                 str1 = read(stream1, 100);
+                str1 = null;
                 //send(stream1, str1);
             }
             Console.WriteLine("Desconnected");
@@ -131,6 +141,10 @@ namespace PongServidor_Sockets.Controller
             if (!string.IsNullOrEmpty(msg))
             {
                 Console.WriteLine("[W]" + msg);
+                if(msg == "StartGame")
+                {
+                    msg = null;
+                }
                 //Debug.WriteLine(msg);
                 byte[] bytes = Encoding.ASCII.GetBytes(msg);
                 stream.Write(bytes, 0, bytes.Length);
@@ -139,12 +153,19 @@ namespace PongServidor_Sockets.Controller
 
         private static string read(NetworkStream stream, int timeout)
         {
-            Byte[] bytes = new Byte[BYTES_NUM];
-            stream.ReadTimeout = timeout;
-            int count = stream.Read(bytes, 0, bytes.Length);
-            string response = Encoding.ASCII.GetString(bytes, 0, count);
-            if (response != null) Console.WriteLine("[R]" + response);
-            return response;
+            try
+            {
+                Byte[] bytes = new Byte[BYTES_NUM];
+                stream.ReadTimeout = timeout;
+                int count = stream.Read(bytes, 0, bytes.Length);
+                string response = Encoding.ASCII.GetString(bytes, 0, count);
+                if (response != null) Console.WriteLine("[R]" + response);
+                return response;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
@@ -157,66 +178,17 @@ namespace PongServidor_Sockets.Controller
             throw new NotImplementedException();
         }
 
-        /// <summary> Prepares both of the players to play </summary>
-        private static void prepareMatch(NetworkStream stream, string playerNumber)
+        private static bool waitForMsg(int timeout, string msg, NetworkStream stream)
         {
-
             Stopwatch stopwatch = new Stopwatch();
-
-            Byte[] bytes = new Byte[BYTES_NUM];
-            stream.ReadTimeout = 100;
-            int count;
-            string response = "";
-
-        matchfound:
             stopwatch.Start();
-            // Wrtites a macth found to know the client is ready
-            bytes = Encoding.ASCII.GetBytes("MatchFound");
-            stream.Write(bytes, 0, bytes.Length);
-            Console.WriteLine("MatchFound");
-
-            bytes = new Byte[BYTES_NUM];
-            while (response != "OK")
+            string response;
+            while (stopwatch.ElapsedMilliseconds < timeout)
             {
-                count = stream.Read(bytes, 0, bytes.Length);
-                response = Encoding.ASCII.GetString(bytes, 0, count);
-                bytes = new Byte[BYTES_NUM];
-                if (stopwatch.Elapsed.Milliseconds > 1000)
-                {
-                    stopwatch.Reset();
-                    goto matchfound;
-                }
+                response = read(stream, 100);
+                if (response == msg) return true;
             }
-
-
-            // Wrtites the player number in order to configure the client
-            bytes = Encoding.ASCII.GetBytes(playerNumber);
-            stream.Write(bytes, 0, bytes.Length);
-            Console.WriteLine(playerNumber);
-
-            bytes = new Byte[BYTES_NUM];
-            while (response != "OK")
-            {
-                count = stream.Read(bytes, 0, bytes.Length);
-                response = Encoding.ASCII.GetString(bytes, 0, count);
-                bytes = new Byte[BYTES_NUM];
-            }
-
-        }
-
-        private static void sendStartGame(NetworkStream stream)
-        {
-            new Task(() =>
-            {
-                Byte[] bytes = new Byte[BYTES_NUM];
-                stream.ReadTimeout = 100;
-                int count;
-                string response = "";
-
-                bytes = Encoding.ASCII.GetBytes("StartGame");
-                stream.Write(bytes, 0, bytes.Length);
-                Console.WriteLine("StartGame");
-            }).Start();
+            return false;
         }
     }
 }
