@@ -32,13 +32,13 @@ namespace PongServidor_Sockets
                 server.Start();
                 Console.WriteLine("server started with " + server.LocalEndpoint.ToString());
 
-                
+                PartidaHandler partidaHandler = new PartidaHandler();
 
                 for (int i = 0; i < partidasPool.Length; i++)
                 {
                     partidasPool[i] = new Partida();
                 }
-
+                int t=0;
                 Console.WriteLine("Waiting for clients to connect");
                 while (true)
                 {
@@ -52,7 +52,8 @@ namespace PongServidor_Sockets
                         if ((partidasPool[index].client1 != null) )//&& (partidasPool[index].client2 != null))
                         {
                             partidasPool[index].jugandose = true;
-                            new Task(() => PartidaHandler.handleClientOnlyOne(server, partidasPool[index])).Start();
+                            new Task(() => partidaHandler.handleClientOnlyOne(server, partidasPool[index], t)).Start();
+                            t++;
                         }
                     }
                 }

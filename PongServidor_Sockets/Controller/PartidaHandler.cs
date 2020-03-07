@@ -14,15 +14,15 @@ namespace PongServidor_Sockets.Controller
 {
     class PartidaHandler
     {
-        private static NetworkStream stream1;
-        private static NetworkStream stream2;
-        private static RecieverHandler recieverHandler1;
-        private static RecieverHandler recieverHandler2;
-        private static PortGenerator portGenerator = new PortGenerator();
+        private  NetworkStream stream1;
+        private  NetworkStream stream2;
+        private  PortGenerator portGenerator = new PortGenerator();
 
         private const int BYTES_NUM = 512;
 
-        //public static void handleClient(TcpListener server, Partida partida)
+        private  int t { get; set; }
+
+        //public  void handleClient(TcpListener server, Partida partida)
         //{
 
         //    Console.WriteLine("Match Found, 2 clients connected");
@@ -60,10 +60,10 @@ namespace PongServidor_Sockets.Controller
 
         //}
 
-        public static void handleClientOnlyOne(TcpListener server, Partida partida)
+        public void handleClientOnlyOne(TcpListener server, Partida partida, int t)
         {
-
-            Console.WriteLine("Match Found, 1 client connected");
+            this.t = t;
+            Console.WriteLine("Match Found, 1 client connected" + " t:" + t);
 
             stream1 = partida.client1.GetStream();
 
@@ -100,14 +100,14 @@ namespace PongServidor_Sockets.Controller
         }
 
         /// <summary>Checks if both of the clients are still connected</summary>
-        private static bool bothConnected(Partida partida)
+        private  bool bothConnected(Partida partida)
         {
             if (isConnected(partida.client1)) return true;
             else return false;
         }
 
         /// <summary>Checks if the client is still connected</summary>
-        private static bool isConnected(TcpClient client)
+        private  bool isConnected(TcpClient client)
         {
             IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
 
@@ -136,22 +136,18 @@ namespace PongServidor_Sockets.Controller
         }
 
         /// <summary>If the msg is not null, tries to send it</summary>
-        private static void send(NetworkStream stream, string msg)
+        private  void send(NetworkStream stream, string msg)
         {
             if (!string.IsNullOrEmpty(msg))
             {
-                Console.WriteLine("[W]" + msg);
-                if(msg == "StartGame")
-                {
-                    msg = null;
-                }
+                Console.WriteLine("[W]" + msg + " t:" + t);
                 //Debug.WriteLine(msg);
                 byte[] bytes = Encoding.ASCII.GetBytes(msg);
                 stream.Write(bytes, 0, bytes.Length);
             }
         }
 
-        private static string read(NetworkStream stream, int timeout)
+        private  string read(NetworkStream stream, int timeout)
         {
             try
             {
@@ -159,7 +155,7 @@ namespace PongServidor_Sockets.Controller
                 stream.ReadTimeout = timeout;
                 int count = stream.Read(bytes, 0, bytes.Length);
                 string response = Encoding.ASCII.GetString(bytes, 0, count);
-                if (response != null) Console.WriteLine("[R]" + response);
+                if (response != null) Console.WriteLine("[R]" + response + " t:" + t);
                 return response;
             }
             catch
@@ -168,7 +164,7 @@ namespace PongServidor_Sockets.Controller
             }
         }
 
-        private static void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
+        private  void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
         {
             // Maybe useless
             int freePort;
@@ -178,7 +174,7 @@ namespace PongServidor_Sockets.Controller
             throw new NotImplementedException();
         }
 
-        private static bool waitForMsg(int timeout, string msg, NetworkStream stream)
+        private  bool waitForMsg(int timeout, string msg, NetworkStream stream)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
