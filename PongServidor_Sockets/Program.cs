@@ -47,12 +47,12 @@ namespace PongServidor_Sockets
                     if (index >= 0)
                     {
                         if (partidasPool[index].client1 == null) partidasPool[index].client1 = client;
-                        //else if (partidasPool[index].client2 == null) partidasPool[index].client2 = client;
+                        else if (partidasPool[index].client2 == null) partidasPool[index].client2 = client;
 
-                        if ((partidasPool[index].client1 != null) )//&& (partidasPool[index].client2 != null))
+                        if ((partidasPool[index].client1 != null) && (partidasPool[index].client2 != null))
                         {
                             partidasPool[index].jugandose = true;
-                            new Task(() => partidaHandler.handleClientOnlyOne(server, partidasPool[index], t)).Start();
+                            new Task(() => partidaHandler.handleClient(server, partidasPool[index], t)).Start();
                             t++;
                         }
                     }

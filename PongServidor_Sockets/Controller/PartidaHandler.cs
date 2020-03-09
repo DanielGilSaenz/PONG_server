@@ -14,51 +14,63 @@ namespace PongServidor_Sockets.Controller
 {
     class PartidaHandler
     {
-        private  NetworkStream stream1;
-        private  NetworkStream stream2;
-        private  PortGenerator portGenerator = new PortGenerator();
+        private NetworkStream stream1;
+        private NetworkStream stream2;
+        private PortGenerator portGenerator = new PortGenerator();
 
         private const int BYTES_NUM = 512;
 
-        private  int t { get; set; }
+        private int t { get; set; }
 
-        //public  void handleClient(TcpListener server, Partida partida)
-        //{
+        public void handleClient(TcpListener server, Partida partida, int t)
+        {
+            this.t = t;
+            Console.WriteLine("Match Found, 1 client connected" + " t:" + t);
 
-        //    Console.WriteLine("Match Found, 2 clients connected");
+            stream1 = partida.client1.GetStream();
+            stream2 = partida.client2.GetStream();
 
-        //    stream1 = partida.client1.GetStream();
-        //    stream2 = partida.client2.GetStream();
+            do
+            {
+                send(stream1, "MatchFound");
+            } while (!waitForMsg(1500, "OK", stream1));
+
+            do
+            {
+                send(stream2, "MatchFound");
+            } while (!waitForMsg(1500, "OK", stream2));
+
+            do
+            {
+                send(stream1, "p1");
+            } while (!waitForMsg(1500, "OK", stream1));
+
+            do
+            {
+                send(stream2, "p2");
+            } while (!waitForMsg(1500, "OK", stream2));
 
 
-        //    // TODO Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
-        //    // TODO Si generar una task cada vez que se envia
-        //    // TODO [!] Pendiente el testing
+            send(stream1, "StartGame");
+            send(stream1, "StartGame");
 
-        //    //prepareMatch(stream1, "p1");
-        //    //prepareMatch(stream2, "p2");
+            send(stream2, "StartGame");
+            send(stream2, "StartGame");
 
-        //    //sendStartGame(stream1);
-        //    //sendStartGame(stream2);
+            string str1;
+            string str2;
+            while (true)
+            {
+                str1 = read(stream1, 100);
+                str2 = read(stream2, 100);
+                send(stream1, str2);
+                send(stream2, str1);
+                str1 = null;
+                str2 = null;                
+            }
+            
 
-        //    Byte[] bytes1 = new Byte[BYTES_NUM];
-        //    Byte[] bytes2 = new Byte[BYTES_NUM];
-
-        //    string str1;
-        //    string str2;
-
-        //    while (bothConnected(partida))
-        //    {
-        //        // TODO reciever handles seems to not work at all
-        //        str1 = read(stream1, 100);
-        //        str2 = read(stream2, 100);
-
-        //        send(stream1, str2);
-        //        send(stream2, str1);
-        //    }
-        //    Console.WriteLine("Desconnected");
-
-        //}
+        }
 
         public void handleClientOnlyOne(TcpListener server, Partida partida, int t)
         {
@@ -66,11 +78,6 @@ namespace PongServidor_Sockets.Controller
             Console.WriteLine("Match Found, 1 client connected" + " t:" + t);
 
             stream1 = partida.client1.GetStream();
-
-
-            // TODO Hay que mirar como hacer lo de enviar y recibir de manera sincrona pero que sea efficiente
-            // TODO Si generar una task cada vez que se envia
-            // TODO [!] Pendiente el testing
 
             do
             {
@@ -85,58 +92,29 @@ namespace PongServidor_Sockets.Controller
             do
             {
                 send(stream1, "StartGame");
-            } while (!waitForMsg(5000,"OK", stream1));
+            } while (!waitForMsg(5000, "OK", stream1));
 
             string str1;
-            while (bothConnected(partida))
+            while (true)
             {
-                // TODO reciever handles seems to not work at all
-                str1 = read(stream1, 100);
-                str1 = null;
-                //send(stream1, str1);
+                try
+                {
+                    str1 = read(stream1, 100);
+                    str1 = null;
+                    //send(stream1, str1);
+                }
+                catch
+                {
+                    return;
+                }
+                
             }
             Console.WriteLine("Desconnected");
 
         }
 
-        /// <summary>Checks if both of the clients are still connected</summary>
-        private  bool bothConnected(Partida partida)
-        {
-            if (isConnected(partida.client1)) return true;
-            else return false;
-        }
-
-        /// <summary>Checks if the client is still connected</summary>
-        private  bool isConnected(TcpClient client)
-        {
-            IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
-
-            TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections();
-
-            foreach (TcpConnectionInformation c in tcpConnections)
-            {
-                TcpState stateOfConnection = c.State;
-
-                if (c.LocalEndPoint.Equals(client.Client.LocalEndPoint) && c.RemoteEndPoint.Equals(client.Client.RemoteEndPoint))
-                {
-                    if (stateOfConnection == TcpState.Established)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-
-                }
-
-            }
-
-            return false;
-        }
-
         /// <summary>If the msg is not null, tries to send it</summary>
-        private  void send(NetworkStream stream, string msg)
+        private void send(NetworkStream stream, string msg)
         {
             if (!string.IsNullOrEmpty(msg))
             {
@@ -147,7 +125,7 @@ namespace PongServidor_Sockets.Controller
             }
         }
 
-        private  string read(NetworkStream stream, int timeout)
+        private string read(NetworkStream stream, int timeout)
         {
             try
             {
@@ -162,9 +140,10 @@ namespace PongServidor_Sockets.Controller
             {
                 return null;
             }
+            
         }
 
-        private  void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
+        private void getNextPort(NetworkStream oldStream, out NetworkStream newStream)
         {
             // Maybe useless
             int freePort;
@@ -174,7 +153,8 @@ namespace PongServidor_Sockets.Controller
             throw new NotImplementedException();
         }
 
-        private  bool waitForMsg(int timeout, string msg, NetworkStream stream)
+        /// <summary> Return true if the response is equal to the msg before the timeout</summary>
+        private bool waitForMsg(int timeout, string msg, NetworkStream stream)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
